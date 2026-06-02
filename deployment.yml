@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: iris-model
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: iris-model
+  template:
+    metadata:
+      labels:
+        app: iris-model
+    spec:
+      containers:
+      - name: iris-model
+        image: docker.io/library/iris-model:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 5001
