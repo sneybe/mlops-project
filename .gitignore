@@ -1,0 +1,19 @@
+# Environnement virtuel Python
+mlops-env/
+
+# MLflow
+mlruns/
+mlflow.db
+
+# Docker
+iris-model.tar
+pause.tar
+*.tar
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS
+.DS_Store
