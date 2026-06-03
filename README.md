@@ -45,3 +45,4 @@ curl -X POST http://192.168.65.40:32653/invocations \
 - [ ] Azure ML / AWS SageMaker
 - [ ] Monitoring avec Evidently AI + Grafana
 - [ ] LLMOps — déployer un LLM
+je test s,il va declencher le pipeline
