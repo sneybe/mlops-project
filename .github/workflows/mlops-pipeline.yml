@@ -3,7 +3,12 @@ name: MLOps Pipeline
 on:
   push:
     branches: [ main ]
-
+    paths:
+      - 'train.py'
+      - 'Dockerfile'
+      - 'deployment.yml'
+      - 'service.yml'
+      - '.github/workflows/mlops-pipeline.yml'
 jobs:
   train-and-build:
     runs-on: self-hosted
