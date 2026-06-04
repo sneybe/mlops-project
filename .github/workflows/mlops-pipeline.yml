@@ -16,13 +16,8 @@ on:
       - '.github/workflows/mlops-pipeline.yml'
 
 jobs:
-  # ── JOB 1 : Iris Model ──
   iris-pipeline:
     runs-on: self-hosted
-    if: |
-      contains(github.event.head_commit.modified, 'train.py') ||
-      contains(github.event.head_commit.modified, 'Dockerfile') ||
-      contains(github.event.head_commit.modified, 'app.py')
 
     steps:
     - name: Checkout code
@@ -51,12 +46,9 @@ jobs:
         kubectl apply -f service.yml
         kubectl rollout restart deployment/iris-model
 
-  # ── JOB 2 : LLM API ──
   llm-pipeline:
     runs-on: self-hosted
-    if: |
-      contains(github.event.head_commit.modified, 'llm_app.py') ||
-      contains(github.event.head_commit.modified, 'Dockerfile.llm')
+    needs: iris-pipeline
 
     steps:
     - name: Checkout code
@@ -66,7 +58,7 @@ jobs:
       run: |
         docker build -f Dockerfile.llm -t llm-api:latest .
 
-    - name: Export et import dans K3s
+    - name: Import dans K3s
       run: |
         docker save llm-api -o /tmp/llm-api.tar
         sudo k3s ctr images import /tmp/llm-api.tar
