@@ -61,8 +61,8 @@ jobs:
     - name: Import dans K3s
       run: |
         docker save llm-api -o /tmp/llm-api.tar
-        sudo k3s ctr images import /tmp/llm-api.tar
-
+        scp /tmp/llm-api.tar ubuntu@192.168.65.40:~/llm-api.tar
+        ssh ubuntu@192.168.65.40 "sudo k3s ctr images import ~/llm-api.tar"
     - name: Deploy LLM sur Kubernetes
       run: |
         kubectl apply -f deployment-llm.yml
