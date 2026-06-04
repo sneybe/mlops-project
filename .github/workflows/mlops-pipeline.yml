@@ -6,12 +6,23 @@ on:
     paths:
       - 'train.py'
       - 'Dockerfile'
+      - 'app.py'
+      - 'llm_app.py'
+      - 'Dockerfile.llm'
       - 'deployment.yml'
+      - 'deployment-llm.yml'
       - 'service.yml'
+      - 'service-llm.yml'
       - '.github/workflows/mlops-pipeline.yml'
+
 jobs:
-  train-and-build:
+  # ── JOB 1 : Iris Model ──
+  iris-pipeline:
     runs-on: self-hosted
+    if: |
+      contains(github.event.head_commit.modified, 'train.py') ||
+      contains(github.event.head_commit.modified, 'Dockerfile') ||
+      contains(github.event.head_commit.modified, 'app.py')
 
     steps:
     - name: Checkout code
@@ -28,17 +39,40 @@ jobs:
         cd $GITHUB_WORKSPACE
         MLFLOW_ALLOW_FILE_STORE=true python train.py
 
-    - name: Build Docker image
+    - name: Build and Push Iris image
       run: |
         docker build -t sambasy/iris-model:latest .
-
-    - name: Push Docker image
-      run: |
         echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
         docker push sambasy/iris-model:latest
 
-    - name: Deploy sur Kubernetes
+    - name: Deploy Iris sur Kubernetes
       run: |
         kubectl apply -f deployment.yml
         kubectl apply -f service.yml
         kubectl rollout restart deployment/iris-model
+
+  # ── JOB 2 : LLM API ──
+  llm-pipeline:
+    runs-on: self-hosted
+    if: |
+      contains(github.event.head_commit.modified, 'llm_app.py') ||
+      contains(github.event.head_commit.modified, 'Dockerfile.llm')
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Build LLM image
+      run: |
+        docker build -f Dockerfile.llm -t llm-api:latest .
+
+    - name: Export et import dans K3s
+      run: |
+        docker save llm-api -o /tmp/llm-api.tar
+        sudo k3s ctr images import /tmp/llm-api.tar
+
+    - name: Deploy LLM sur Kubernetes
+      run: |
+        kubectl apply -f deployment-llm.yml
+        kubectl apply -f service-llm.yml
+        kubectl rollout restart deployment/llm-api
