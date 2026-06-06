@@ -1,6 +1,6 @@
 # MLOps Project — Sy Samba
 
-Pipeline MLOps + LLMOps complet de bout en bout.
+Pipeline MLOps + LLMOps + RAG complet de bout en bout.
 
 ## Stack technique
 
@@ -13,9 +13,12 @@ Pipeline MLOps + LLMOps complet de bout en bout.
 | GitHub Actions | CI/CD | - |
 | Docker Hub | Registry | - |
 | Prometheus | Métriques | latest |
-| Grafana | Dashboard | latest |
+| Grafana | Dashboard + Alerting | latest |
 | Ollama | Moteur LLM | 0.30.3 |
 | phi3:mini | Modèle LLM | 3.8B |
+| LangChain | Framework RAG | latest |
+| ChromaDB | Base vectorielle | latest |
+| Terraform | Infrastructure as Code | v1.8.4 |
 
 ## Infrastructure
 
@@ -39,25 +42,12 @@ cd ~/mlops-project
 | MLflow UI | http://192.168.65.37:5000 | Tracking modèles |
 | FastAPI Iris | http://192.168.65.37:5001 | API prédiction fleurs |
 | FastAPI LLM | http://192.168.65.37:8000 | API questions/réponses |
+| RAG API | http://192.168.65.37:8001 | API RAG sur docs |
 | Ollama | http://192.168.65.37:11434 | Moteur LLM |
 | iris-model K8s | http://192.168.65.40:32653 | Modèle en production |
 | llm-api K8s | http://192.168.65.40:30222 | LLM en production |
 | Grafana | http://192.168.65.38:3000 | Dashboard monitoring |
 | Prometheus | http://192.168.65.38:9090 | Métriques |
-
-## Pipeline CI/CD
-git push
-↓
-iris-pipeline (32s)
-├── Train modèle Iris
-├── Docker build + push Docker Hub
-└── Deploy K8s iris-model
-↓
-llm-pipeline (10s)
-├── Docker build llm-api
-├── Push Docker Hub
-├── Import dans K3s
-└── Deploy K8s llm-api
 
 ## APIs
 
@@ -79,21 +69,71 @@ curl -X POST http://192.168.65.37:8000/ask \
 # {"response": "Docker est..."}
 ```
 
+### RAG API — Questions sur tes documents
+
+```bash
+curl -X POST http://192.168.65.37:8001/rag \
+  -H "Content-Type: application/json" \
+  -d '{"question": "Quelle est lIP de la VM k8s ?"}'
+# {"response": "192.168.65.40"}
+```
+
+## Pipeline CI/CD
+git push
+↓
+iris-pipeline (32s)
+├── Train modèle Iris
+├── Docker build + push Docker Hub
+└── Deploy K8s iris-model
+↓
+llm-pipeline (10s)
+├── Docker build llm-api
+├── Push Docker Hub
+├── Import dans K3s
+└── Deploy K8s llm-api
+
+## Monitoring + Alerting
+FastAPI /metrics
+↓
+Prometheus scrape toutes les 15s
+↓
+Grafana dashboard temps réel
+↓
+Alertes email si :
+
+llm_errors_total > 5
+latence > 60s
+plus de prédictions
+
+
+## RAG (Retrieval Augmented Generation)
+Documents (README.md)
+↓
+LangChain découpe en chunks
+↓
+ChromaDB stocke les vecteurs
+↓
+Question → chunks pertinents → phi3:mini
+↓
+Réponse basée sur TES données !
+
 ## Docker Hub
 
 - sambasy/iris-model:latest
 - sambasy/llm-api:latest
 
-## Architecture
-Code → GitHub → Actions → Train → Docker → K8s
-↓
-Docker Hub
-sambasy/iris-model
-sambasy/llm-api
+## Terraform
+
+```bash
+cd ~/mlops-terraform
+terraform plan    # voir l'infra
+terraform apply   # créer l'infra
+terraform destroy # supprimer l'infra
+```
 
 ## Prochaines étapes
 
-- [ ] Terraform — infrastructure as code
+- [ ] DVC — versioning des données
 - [ ] Azure ML / AWS SageMaker
-- [ ] Alerting Grafana
-- [ ] RAG avec LangChain
+- [ ] Fine-tuning LLM
+- [ ] vLLM en production
