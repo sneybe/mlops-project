@@ -29,7 +29,12 @@ OLLAMA_URL = os.getenv("OLLAMA_HOST", "http://localhost:11434") + "/api/generate
 async def ask(data: dict):
     question = data.get("question", "")
     REQUESTS.inc()
-    
+
+    # Vérifier que la question n'est pas vide
+    if not question:
+        ERRORS.inc()
+        return {"error": "Le champ 'question' est obligatoire"}
+
     start = time.time()
     try:
         async with httpx.AsyncClient(timeout=120) as client:
@@ -41,7 +46,7 @@ async def ask(data: dict):
             result = response.json()
             latency = time.time() - start
             LATENCY.observe(latency)
-            
+
             return {
                 "question": question,
                 "response": result.get("response", ""),
