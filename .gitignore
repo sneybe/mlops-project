@@ -26,3 +26,4 @@ iris-model.tar
 .terraform.lock.hcl
 *.tfvars
 chroma_db/
+chroma_db/
