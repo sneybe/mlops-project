@@ -46,11 +46,6 @@ jobs:
         echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
         docker push sambasy/iris-model:latest
 
-    - name: Deploy Iris sur Kubernetes
-      run: |
-        kubectl apply -f deployment.yml
-        kubectl apply -f service.yml
-        kubectl rollout restart deployment/iris-model
 
   llm-pipeline:
     runs-on: self-hosted
@@ -75,8 +70,8 @@ jobs:
         scp /tmp/llm-api.tar ubuntu@192.168.65.40:~/llm-api.tar
         ssh ubuntu@192.168.65.40 "sudo k3s ctr images import ~/llm-api.tar"
 
-    - name: Deploy LLM sur Kubernetes
+    - name: Deploy avec Helm
       run: |
-        kubectl apply -f deployment-llm.yml
-        kubectl apply -f service-llm.yml
-        kubectl rollout restart deployment/llm-api
+        helm upgrade --install mlops-app ./mlops-chart \
+          --set irisModel.image=sambasy/iris-model:latest \
+          --set llmApi.image=sambasy/llm-api:latest
