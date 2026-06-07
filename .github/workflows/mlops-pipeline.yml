@@ -35,6 +35,10 @@ jobs:
         MLFLOW_TRACKING_URI=http://192.168.65.37:5000 \
         MLFLOW_ALLOW_FILE_STORE=true \
         python train.py
+    
+    - name: Copier mlruns dans workspace
+      run: |
+        cp -r ~/mlops-project/mlruns $GITHUB_WORKSPACE/mlruns
 
     - name: Build and Push Iris image
       run: |
