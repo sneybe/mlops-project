@@ -32,7 +32,9 @@ jobs:
       run: |
         source ~/mlops-project/mlops-env/bin/activate
         cd $GITHUB_WORKSPACE
-        MLFLOW_ALLOW_FILE_STORE=true python train.py
+        MLFLOW_TRACKING_URI=http://192.168.65.37:5000 \
+        MLFLOW_ALLOW_FILE_STORE=true \
+        python train.py
 
     - name: Build and Push Iris image
       run: |
