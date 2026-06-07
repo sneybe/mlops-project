@@ -1,0 +1,12 @@
+irisModel:
+  image: sambasy/iris-model:latest
+  port: 5001
+  nodePort: 32653
+  replicas: 1
+
+llmApi:
+  image: sambasy/llm-api:latest
+  port: 8000
+  nodePort: 30222
+  replicas: 1
+  ollamaHost: "http://192.168.65.37:11434"

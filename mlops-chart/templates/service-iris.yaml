@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: iris-model-service
+spec:
+  selector:
+    app: iris-model
+  ports:
+  - port: {{ .Values.irisModel.port }}
+    targetPort: {{ .Values.irisModel.port }}
+    nodePort: {{ .Values.irisModel.nodePort }}
+  type: NodePort

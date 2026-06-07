@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-api
+spec:
+  replicas: {{ .Values.llmApi.replicas }}
+  selector:
+    matchLabels:
+      app: llm-api
+  template:
+    metadata:
+      labels:
+        app: llm-api
+    spec:
+      containers:
+      - name: llm-api
+        image: {{ .Values.llmApi.image }}
+        imagePullPolicy: Never
+        ports:
+        - containerPort: {{ .Values.llmApi.port }}
+        env:
+        - name: OLLAMA_HOST
+          value: {{ .Values.llmApi.ollamaHost }}
