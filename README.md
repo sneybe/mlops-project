@@ -137,3 +137,35 @@ terraform destroy # supprimer l'infra
 - [ ] Azure ML / AWS SageMaker
 - [ ] Fine-tuning LLM
 - [ ] vLLM en production
+
+## Helm Chart
+
+Déployer tout le stack sur Kubernetes en une commande :
+
+```bash
+# Installer
+helm install mlops-app ./mlops-chart
+
+# Mettre à jour
+helm upgrade mlops-app ./mlops-chart
+
+# Revenir en arrière
+helm rollback mlops-app 1
+
+# Désinstaller
+helm uninstall mlops-app
+```
+
+## DVC — Versioning des données
+
+```bash
+# Tracker un dataset
+dvc add data/iris_v1.csv
+
+# Voir les versions
+git log --oneline data/
+
+# Changer de version
+git checkout <commit> -- data/iris_v1.csv.dvc
+dvc checkout
+```
