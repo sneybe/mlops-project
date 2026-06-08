@@ -176,9 +176,18 @@ docker-compose up -d
 ```bash
 # Sur Mac
 multipass exec k8s -- sudo cat /etc/rancher/k3s/k3s.yaml > ~/k3s.yaml
-sed -i 's/127.0.0.1/192.168.65.40/g' ~/k3s.yaml
+
+# ⚠️ Sur Mac : sed -i nécessite '' 
+sed -i '' 's/127.0.0.1/TON_IP_K8S/g' ~/k3s.yaml
+
+# Créer le dossier .kube sur devops
+multipass exec devops -- mkdir -p /home/ubuntu/.kube
+
+# Transférer
 multipass transfer ~/k3s.yaml devops:/home/ubuntu/.kube/config
 
+# Vérifier
+multipass exec devops -- kubectl get nodes
 # Vérifier
 kubectl get nodes
 ```
