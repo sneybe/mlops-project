@@ -1,0 +1,6 @@
+mlops-env/
+chroma_db/
+*.tar
+*.db
+.git/
+__pycache__/
