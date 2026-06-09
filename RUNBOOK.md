@@ -83,12 +83,14 @@ newgrp docker
 
 # Python + venv
 sudo apt install python3 python3-pip python3-venv -y
+
+# ⚠️ D'abord cloner le repo AVANT de créer l'env virtuel
 mkdir -p ~/mlops-project && cd ~/mlops-project
+git clone https://github.com/sneybe/mlops-project.git .
+
+# Ensuite créer l'env virtuel
 python3 -m venv mlops-env
 source mlops-env/bin/activate
-
-# ⚠️ Cloner dans le dossier courant avec le point !
-git clone https://github.com/sneybe/mlops-project.git .
 
 # Installer les dépendances
 pip install mlflow scikit-learn pandas fastapi uvicorn \
