@@ -3,6 +3,7 @@ from prometheus_client import Counter, Histogram, generate_latest
 from prometheus_client import CONTENT_TYPE_LATEST
 from starlette.responses import Response
 import mlflow.sklearn
+import glob
 import os
 
 app = FastAPI()
@@ -18,11 +19,16 @@ LATENCY = Histogram(
     'Prediction latency'
 )
 
-# Charger le modèle
+# ── Charger le modèle automatiquement ────────
 os.environ['MLFLOW_ALLOW_FILE_STORE'] = 'true'
-model = mlflow.sklearn.load_model(
-    "mlruns/1/models/m-99929f406d8e4ebca5617cdfcc676b69/artifacts"
-)
+
+models = glob.glob("mlruns/1/models/*/artifacts")
+if not models:
+    raise Exception("Aucun modèle trouvé dans mlruns/")
+model_path = sorted(models)[-1]
+print(f"📦 Modèle chargé : {model_path}")
+
+model = mlflow.sklearn.load_model(model_path)
 
 classes = {0: 'Setosa', 1: 'Versicolor', 2: 'Virginica'}
 
