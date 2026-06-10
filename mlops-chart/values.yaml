@@ -9,4 +9,4 @@ llmApi:
   port: 8000
   nodePort: 30222
   replicas: 1
-  ollamaHost: "http://192.168.65.37:11434"
+  ollamaHost: "http://192.168.65.44:11434"

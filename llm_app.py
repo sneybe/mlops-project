@@ -37,7 +37,7 @@ async def ask(data: dict):
 
     start = time.time()
     try:
-        async with httpx.AsyncClient(timeout=120) as client:
+        async with httpx.AsyncClient(timeout=300) as client:
             response = await client.post(OLLAMA_URL, json={
                 "model": "phi3:mini",
                 "prompt": question,
