@@ -12,7 +12,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 )
 
 # ── 2. Entraînement + Tracking MLflow ───────────────
-mlflow.set_experiment("mon-premier-modele")
+mlflow.set_experiment("mlops-s3")
 # Pointer vers le MLflow de la VM
 mlflow.set_tracking_uri(
     os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5000")
