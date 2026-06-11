@@ -169,3 +169,42 @@ git log --oneline data/
 git checkout <commit> -- data/iris_v1.csv.dvc
 dvc checkout
 ```
+## AWS Infrastructure
+
+| Service | Rôle | Coût |
+|---------|------|------|
+| S3 | MLflow artifacts + Terraform state | ~$5/mois |
+| ECR | Registry Docker privé | ~$1/mois |
+| SageMaker | Endpoint iris-model | ~$0.05/heure |
+| IAM | Rôle SageMaker permanent | Gratuit |
+
+## Déploiement SageMaker
+
+```bash
+# Déployer
+cd terraform-aws
+terraform apply -auto-approve
+
+# Tester
+echo '{"inputs": [[5.1, 3.5, 1.4, 0.2]]}' > /tmp/request.json
+aws sagemaker-runtime invoke-endpoint \
+  --endpoint-name iris-model-endpoint \
+  --content-type application/json \
+  --body fileb:///tmp/request.json \
+  --region ca-central-1 \
+  /tmp/output.json
+
+# ⚠️ Éteindre après utilisation
+terraform destroy -auto-approve
+```
+
+## Stack complet
+
+```
+Local                    AWS
+─────                    ───
+K8s (K3s) + Helm    →   SageMaker Endpoint
+Docker Hub          →   ECR
+mlruns/ local       →   S3
+Prometheus/Grafana  →   CloudWatch (à venir)
+```
