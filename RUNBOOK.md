@@ -488,3 +488,120 @@ RAG API consomme beaucoup de RAM
 Les IPs dans prometheus.yml doivent pointer vers IP_DEVOPS
 → Pas vers IP_K8S !
 
+---
+
+## Étape 15 — Configuration AWS
+
+### Prérequis AWS
+- Compte AWS actif
+- Utilisateur IAM (mlops_user) avec permissions :
+  - AmazonSageMakerFullAccess
+  - AmazonS3FullAccess
+  - AmazonEC2FullAccess
+  - AmazonEC2ContainerRegistryFullAccess
+  - IAMFullAccess
+
+### Installer AWS CLI
+
+```bash
+curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+sudo apt install unzip -y
+unzip awscliv2.zip
+sudo ./aws/install
+aws configure
+```
+
+### Créer les ressources AWS (une seule fois)
+
+```bash
+# Bucket S3
+aws s3 mb s3://mlops-samba-artifacts --region ca-central-1
+
+# Repos ECR
+aws ecr create-repository --repository-name iris-model --region ca-central-1
+aws ecr create-repository --repository-name llm-api --region ca-central-1
+
+# Rôle IAM SageMaker (permanent)
+aws iam create-role \
+  --role-name mlops-sagemaker-role \
+  --assume-role-policy-document '{
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Principal": {"Service": "sagemaker.amazonaws.com"},
+      "Action": "sts:AssumeRole"
+    }]
+  }'
+
+aws iam attach-role-policy \
+  --role-name mlops-sagemaker-role \
+  --policy-arn arn:aws:iam::aws:policy/AmazonSageMakerFullAccess
+
+aws iam attach-role-policy \
+  --role-name mlops-sagemaker-role \
+  --policy-arn arn:aws:iam::aws:policy/AmazonS3FullAccess
+```
+
+### Pusher les images vers ECR
+
+```bash
+# Login ECR
+aws ecr get-login-password --region ca-central-1 | \
+  docker login --username AWS \
+  --password-stdin ACCOUNT_ID.dkr.ecr.ca-central-1.amazonaws.com
+
+# Builder en amd64 (SageMaker = x86)
+docker buildx create --use --name amd64builder
+
+docker buildx build \
+  --platform linux/amd64 \
+  --provenance=false \
+  --sbom=false \
+  -f Dockerfile.sagemaker \
+  -t ACCOUNT_ID.dkr.ecr.ca-central-1.amazonaws.com/iris-model:latest \
+  --push \
+  .
+```
+
+### Déployer SageMaker avec Terraform
+
+```bash
+cd terraform-aws
+terraform init
+terraform apply -auto-approve
+
+# Tester
+echo '{"inputs": [[5.1, 3.5, 1.4, 0.2]]}' > /tmp/request.json
+aws sagemaker-runtime invoke-endpoint \
+  --endpoint-name iris-model-endpoint \
+  --content-type application/json \
+  --body fileb:///tmp/request.json \
+  --region ca-central-1 \
+  /tmp/output.json
+cat /tmp/output.json
+# → {"predictions":[0],"classes":["Setosa"]}
+
+# ⚠️ Éteindre après utilisation !
+terraform destroy -auto-approve
+```
+
+---
+
+## ⚠️ Notes AWS importantes
+Toujours éteindre l'endpoint après utilisation
+→ terraform destroy -auto-approve
+→ ml.t2.medium coûte ~$0.05/heure
+Les images Docker doivent être en amd64
+→ SageMaker tourne sur x86, pas ARM64
+→ Utiliser docker buildx avec --platform linux/amd64
+Le state Terraform est dans S3
+→ mlops-samba-artifacts/terraform/sagemaker.tfstate
+→ Partagé entre pipeline et VM devops
+Le rôle IAM est permanent
+→ Ne jamais le détruire avec terraform destroy
+→ Utiliser data source dans Terraform
+MLflow artifacts dans S3
+→ Créer une nouvelle expérience avec artifact_location S3
+→ serve.py charge automatiquement depuis S3
+
+EOF
