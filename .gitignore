@@ -27,3 +27,7 @@ iris-model.tar
 *.tfvars
 chroma_db/
 chroma_db/
+awscliv2.zip
+aws/
+kubectl
+terraform/LICENSE.txt
