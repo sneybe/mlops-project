@@ -118,7 +118,7 @@ jobs:
           --push \
           .
 
-    - name: Deploy sur SageMaker avec Terraform
+    - name: Deploy sur SageMaker avec Terraform.
       run: |
         cd terraform-aws
         terraform init
