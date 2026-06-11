@@ -120,7 +120,7 @@ jobs:
 
     - name: Deploy sur SageMaker avec Terraform
       run: |
-        cd terraform
+        cd terraform-aws
         terraform init
         terraform apply -auto-approve
 
