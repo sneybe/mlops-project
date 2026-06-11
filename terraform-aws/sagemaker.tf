@@ -1,3 +1,21 @@
+terraform {
+  backend "s3" {
+    bucket = "mlops-samba-artifacts"
+    key    = "terraform/sagemaker.tfstate"
+    region = "ca-central-1"
+  }
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 6.0"
+    }
+  }
+}
+
+
+
+
 # ── Variables ──────────────────────────────
 variable "region" {
   default = "ca-central-1"
