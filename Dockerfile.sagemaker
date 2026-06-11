@@ -1,12 +1,12 @@
+
 FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN pip install mlflow scikit-learn pandas flask gunicorn
-
-COPY mlruns/ /app/mlruns/
+RUN pip install mlflow scikit-learn pandas flask gunicorn boto3
 
 ENV MLFLOW_ALLOW_FILE_STORE=true
+ENV AWS_DEFAULT_REGION=ca-central-1
 
 EXPOSE 8080
 
