@@ -31,3 +31,5 @@ awscliv2.zip
 aws/
 kubectl
 terraform/LICENSE.txt
+# Exception pour terraform-aws lock file
+!terraform-aws/.terraform.lock.hcl
