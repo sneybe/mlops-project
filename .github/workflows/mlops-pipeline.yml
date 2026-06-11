@@ -11,6 +11,7 @@ on:
       - 'Dockerfile.llm'
       - 'mlops-chart/**'
       - 'terraform/**'
+      - 'terraform-aws/**'
       - '.github/workflows/mlops-pipeline.yml'
 
 jobs:
