@@ -72,8 +72,8 @@ jobs:
     - name: Import dans K3s
       run: |
         docker save sambasy/llm-api -o /tmp/llm-api.tar
-        scp /tmp/llm-api.tar ubuntu@192.168.65.45:~/llm-api.tar
-        ssh ubuntu@192.168.65.45 "sudo k3s ctr images import ~/llm-api.tar"
+        scp -o StrictHostKeyChecking=no /tmp/llm-api.tar ubuntu@192.168.65.45:~/llm-api.tar
+        ssh -o StrictHostKeyChecking=no ubuntu@192.168.65.45 "sudo k3s ctr images import ~/llm-api.tar"
 
     - name: Deploy LLM sur K8s
       run: |
@@ -122,6 +122,16 @@ jobs:
       run: |
         cd terraform-aws
         terraform init
+        
+        # Importer les ressources existantes si elles existent
+        terraform import aws_iam_role.sagemaker_role mlops-sagemaker-role || true
+        
+        terraform import aws_iam_role_policy_attachment.sagemaker_policy \
+          mlops-sagemaker-role/arn:aws:iam::aws:policy/AmazonSageMakerFullAccess || true
+        
+        terraform import aws_iam_role_policy_attachment.s3_policy \
+          mlops-sagemaker-role/arn:aws:iam::aws:policy/AmazonS3FullAccess || true
+        
         terraform apply -auto-approve
 
     - name: Tester l'endpoint SageMaker
