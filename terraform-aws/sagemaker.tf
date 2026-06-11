@@ -53,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "s3_policy" {
 
 # ── SageMaker Model ────────────────────────
 resource "aws_sagemaker_model" "iris_model" {
-  name               = "iris-model-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  name = "iris-model"
   execution_role_arn = aws_iam_role.sagemaker_role.arn
 
   primary_container {
@@ -67,7 +67,7 @@ resource "aws_sagemaker_model" "iris_model" {
 
 # ── Endpoint Configuration ─────────────────
 resource "aws_sagemaker_endpoint_configuration" "iris_config" {
-  name = "iris-model-config-${formatdate("YYYYMMDDhhmmss", timestamp())}"
+  name = "iris-model-config"
 
   production_variants {
     variant_name           = "primary"
