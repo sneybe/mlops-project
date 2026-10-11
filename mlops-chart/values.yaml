@@ -2,7 +2,7 @@ irisModel:
   image: sambasy/iris-model:latest
   port: 5001
   nodePort: 32653
-  replicas: 1
+  replicas: 2
 
 llmApi:
   image: sambasy/llm-api:latest
